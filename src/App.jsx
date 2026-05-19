@@ -7,6 +7,7 @@ const PRODUCTS = [
     icon: "◈", color: "#00E5A0",
     features: ["Contabilidad de doble partida", "Facturación y registro de ventas", "Nómina CSS + ISR + Décimo", "Dashboard ejecutivo con IA"],
     price: "Desde B/. 49/mes",
+    url: "https://erp.gestarsoft.com",
   },
   {
     id: "lex", name: "GestarLex", category: "Gestión Legal",
@@ -14,6 +15,7 @@ const PRODUCTS = [
     icon: "⚖", color: "#FFB930",
     features: ["Términos procesales Ley 402", "Calendario judicial con alertas", "Control de poderes", "Facturación de honorarios"],
     price: "Desde B/. 39.99/mes",
+    url: "https://lex.gestarsoft.com",
   },
   {
     id: "corp", name: "GestarCorp", category: "Gobierno Corporativo",
@@ -22,6 +24,7 @@ const PRODUCTS = [
     features: ["Libro de actas digital", "Beneficiarios finales Ley 52", "Agente residente incluido", "Generador de documentos"],
     price: "B/. 39/mes · B/. 350/año con agente residente",
     highlight: true,
+    url: "https://corp.gestarsoft.com",
   },
   {
     id: "ph-manager", name: "PH Manager", category: "Propiedades Horizontales",
@@ -29,6 +32,7 @@ const PRODUCTS = [
     icon: "⊞", color: "#FF6B6B",
     features: ["Control de morosos", "Cuotas automáticas", "Actas de asamblea", "Portal del propietario"],
     price: "Desde B/. 49/mes",
+    url: "https://ph.gestarsoft.com",
   },
 ];
 
@@ -129,15 +133,16 @@ function ProductCard({ product, index }) {
         paddingTop: 18, borderTop: "1px solid rgba(255,255,255,0.06)",
       }}>
         <span style={{ fontSize: 13, fontWeight: 800, color: product.color, fontFamily: "'DM Mono', monospace" }}>{product.price}</span>
-        <div style={{
+        <a href={product.url} target="_blank" rel="noopener noreferrer" style={{
           display: "flex", alignItems: "center", gap: 6,
           background: `${product.color}14`, border: `1px solid ${product.color}28`,
           borderRadius: 10, padding: "8px 16px",
           fontSize: 12, fontWeight: 700, color: product.color,
           alignSelf: isMobile ? "flex-end" : "auto",
+          textDecoration: "none",
         }}>
           Comenzar <span style={{ fontSize: 14 }}>→</span>
-        </div>
+        </a>
       </div>
     </div>
   );
