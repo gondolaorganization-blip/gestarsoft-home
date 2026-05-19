@@ -244,7 +244,7 @@ export default function GestarSoftHome() {
                 e.target.nextSibling.style.display = "flex";
               }}
               style={{
-                height: isMobile ? 60 : 90,
+                height: isMobile ? 70 : 120,
                 width: "auto",
                 objectFit: "contain",
                 filter: "brightness(1.15) contrast(1.05)",
@@ -797,7 +797,7 @@ export default function GestarSoftHome() {
               src="gestarsoft-logo.png"
               alt="GestarSoft"
               style={{
-                height: 28, width: "auto",
+                height: 50, width: "auto",
                 objectFit: "contain",
                 opacity: 0.6,
                 filter: "brightness(1.2)",
