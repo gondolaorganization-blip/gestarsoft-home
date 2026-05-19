@@ -244,7 +244,7 @@ export default function GestarSoftHome() {
                 e.target.nextSibling.style.display = "flex";
               }}
               style={{
-                height: isMobile ? 80 : 160,
+                height: isMobile ? 100 : 250,
                 width: "auto",
                 objectFit: "contain",
                 filter: "brightness(1.15) contrast(1.05)",
