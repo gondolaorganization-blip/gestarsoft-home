@@ -42,6 +42,12 @@ const TESTIMONIALS = [
   { name: "Ing. Mariana S.", role: "Administradora de PH", text: "Mis morosos bajaron 60% en el primer mes. Los propietarios pagan más rápido con el estado de cuenta automático.", avatar: "MS", color: "#7C6BFF" },
 ];
 
+const WA_NUMBER = "50765143637";
+
+function scrollTo(id) {
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function useIntersection(ref) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -62,6 +68,181 @@ function useWindowWidth() {
   return width;
 }
 
+/* ─── Modal base ─── */
+function Modal({ open, onClose, title, children }) {
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+  if (!open) return null;
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed", inset: 0, zIndex: 200,
+        background: "rgba(0,0,0,0.75)", backdropFilter: "blur(10px)",
+        display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: "#0D1117", border: "1px solid rgba(255,255,255,0.1)",
+          borderRadius: 22, padding: "32px 28px",
+          maxWidth: 540, width: "100%", maxHeight: "88vh", overflowY: "auto",
+          position: "relative",
+        }}
+      >
+        <button
+          onClick={onClose}
+          style={{
+            position: "absolute", top: 16, right: 16,
+            background: "rgba(255,255,255,0.06)", border: "none",
+            borderRadius: 8, width: 32, height: 32, cursor: "pointer",
+            color: "rgba(255,255,255,0.5)", fontSize: 15,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "inherit",
+          }}
+        >✕</button>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: "#EEF2FF", marginBottom: 24, paddingRight: 40, letterSpacing: "-0.02em" }}>{title}</h2>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Demo modal ─── */
+function DemoModal({ open, onClose }) {
+  const [form, setForm] = useState({ nombre: "", empresa: "", producto: "", telefono: "" });
+  const set = k => e => setForm(p => ({ ...p, [k]: e.target.value }));
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    const lines = [
+      "Hola GestarSoft, me interesa solicitar una demo.",
+      "",
+      `Nombre: ${form.nombre}`,
+      form.empresa ? `Empresa: ${form.empresa}` : null,
+      form.producto ? `Producto: ${form.producto}` : null,
+      `Teléfono: ${form.telefono}`,
+    ].filter(l => l !== null).join("\n");
+    window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(lines)}`, "_blank");
+    onClose();
+  }
+
+  const inputStyle = {
+    width: "100%", background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10,
+    padding: "11px 14px", fontSize: 14, color: "#EEF2FF",
+    outline: "none", fontFamily: "inherit", boxSizing: "border-box",
+  };
+  const labelStyle = {
+    fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.45)",
+    letterSpacing: "0.07em", textTransform: "uppercase",
+    display: "block", marginBottom: 7,
+  };
+
+  return (
+    <Modal open={open} onClose={onClose} title="Solicitar demo gratis">
+      <form onSubmit={handleSubmit}>
+        <div style={{ marginBottom: 16 }}>
+          <label style={labelStyle}>Nombre completo *</label>
+          <input required placeholder="Juan Pérez" value={form.nombre} onChange={set("nombre")} style={inputStyle} />
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label style={labelStyle}>Empresa</label>
+          <input placeholder="Mi Empresa S.A." value={form.empresa} onChange={set("empresa")} style={inputStyle} />
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label style={labelStyle}>Teléfono *</label>
+          <input required placeholder="+507 6000-0000" value={form.telefono} onChange={set("telefono")} style={inputStyle} />
+        </div>
+        <div style={{ marginBottom: 28 }}>
+          <label style={labelStyle}>Producto de interés</label>
+          <select
+            value={form.producto}
+            onChange={set("producto")}
+            style={{ ...inputStyle, cursor: "pointer", color: form.producto ? "#EEF2FF" : "rgba(255,255,255,0.3)" }}
+          >
+            <option value="">Seleccionar...</option>
+            <option value="Gestar ERP (Contabilidad)">Gestar ERP — Contabilidad</option>
+            <option value="GestarLex (Gestión Legal)">GestarLex — Gestión Legal</option>
+            <option value="GestarCorp (Gobierno Corporativo)">GestarCorp — Gobierno Corporativo</option>
+            <option value="PH Manager (Propiedades Horizontales)">PH Manager — Propiedades Horizontales</option>
+            <option value="Todos los productos">Todos los productos</option>
+          </select>
+        </div>
+        <button
+          type="submit"
+          style={{
+            width: "100%", background: "linear-gradient(135deg, #00E5A0, #00B87A)",
+            borderRadius: 12, padding: "14px", fontSize: 15, fontWeight: 800,
+            color: "#07090F", border: "none", cursor: "pointer", fontFamily: "inherit",
+          }}
+        >
+          Enviar por WhatsApp →
+        </button>
+        <p style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", textAlign: "center", marginTop: 12 }}>
+          Te abrirá WhatsApp con el mensaje listo. Respondemos en menos de 24 horas.
+        </p>
+      </form>
+    </Modal>
+  );
+}
+
+/* ─── Terms modal ─── */
+function TermsModal({ open, onClose }) {
+  const p = { fontSize: 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.75, marginBottom: 18 };
+  const h = { fontSize: 15, fontWeight: 700, color: "rgba(255,255,255,0.8)", marginBottom: 8, marginTop: 24 };
+  return (
+    <Modal open={open} onClose={onClose} title="Términos de Servicio">
+      <p style={{ ...p, marginTop: 0 }}>Última actualización: mayo 2026. Al usar cualquier producto de GestarSoft, aceptas los siguientes términos.</p>
+      <h3 style={h}>1. Descripción del servicio</h3>
+      <p style={p}>GestarSoft ofrece software de gestión empresarial en modalidad SaaS (Software como Servicio) a través de sus plataformas: Gestar ERP, GestarLex, GestarCorp y PH Manager. El acceso se otorga mediante suscripción mensual o anual.</p>
+      <h3 style={h}>2. Uso aceptable</h3>
+      <p style={p}>El usuario se compromete a utilizar el servicio exclusivamente para fines legales y conforme a la legislación vigente de la República de Panamá. Queda prohibido el uso del software para actividades ilícitas, fraude o cualquier acción que viole derechos de terceros.</p>
+      <h3 style={h}>3. Pagos y cancelación</h3>
+      <p style={p}>Las suscripciones se facturan de forma mensual o anual según el plan seleccionado. No hay contratos de permanencia. Puedes cancelar en cualquier momento desde tu cuenta; el servicio continuará activo hasta el fin del período pagado. No se realizan reembolsos por períodos parciales.</p>
+      <h3 style={h}>4. Disponibilidad</h3>
+      <p style={p}>GestarSoft se esfuerza por mantener una disponibilidad del 99% mensual. Nos reservamos el derecho de realizar mantenimientos programados con notificación previa. No somos responsables por interrupciones causadas por terceros (proveedores de hosting, internet, etc.).</p>
+      <h3 style={h}>5. Propiedad intelectual</h3>
+      <p style={p}>Todo el software, código, diseños, marcas y contenido son propiedad exclusiva de GestarSoft. El usuario recibe una licencia de uso no exclusiva y no transferible durante la vigencia de su suscripción.</p>
+      <h3 style={h}>6. Limitación de responsabilidad</h3>
+      <p style={p}>GestarSoft no será responsable por daños indirectos, lucro cesante ni pérdida de datos derivados del uso o imposibilidad de uso del servicio. La responsabilidad máxima no excederá el monto pagado en los últimos 3 meses.</p>
+      <h3 style={h}>7. Ley aplicable</h3>
+      <p style={p}>Estos términos se rigen por las leyes de la República de Panamá. Cualquier disputa se someterá a la jurisdicción de los tribunales de la Ciudad de Panamá.</p>
+      <h3 style={h}>8. Contacto</h3>
+      <p style={{ ...p, marginBottom: 0 }}>Para consultas sobre estos términos, escríbenos a través de WhatsApp al +507 6514-3637.</p>
+    </Modal>
+  );
+}
+
+/* ─── Privacy modal ─── */
+function PrivacyModal({ open, onClose }) {
+  const p = { fontSize: 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.75, marginBottom: 18 };
+  const h = { fontSize: 15, fontWeight: 700, color: "rgba(255,255,255,0.8)", marginBottom: 8, marginTop: 24 };
+  return (
+    <Modal open={open} onClose={onClose} title="Política de Privacidad">
+      <p style={{ ...p, marginTop: 0 }}>Última actualización: mayo 2026. En GestarSoft valoramos tu privacidad y protegemos tus datos conforme a la Ley 81 de 2019 de Panamá (Ley de Protección de Datos Personales).</p>
+      <h3 style={h}>1. Datos que recopilamos</h3>
+      <p style={p}>Recopilamos datos que tú nos proporcionas directamente: nombre, correo electrónico, teléfono, información de empresa y datos ingresados en la plataforma (facturas, clientes, expedientes, etc.). También recopilamos datos de uso y acceso para mejorar el servicio.</p>
+      <h3 style={h}>2. Cómo usamos tus datos</h3>
+      <p style={p}>Usamos tu información para: prestar y mejorar el servicio, enviarte notificaciones relacionadas con tu cuenta, cumplir con obligaciones legales y brindarte soporte técnico. No vendemos ni compartimos tus datos con terceros con fines comerciales.</p>
+      <h3 style={h}>3. Almacenamiento y seguridad</h3>
+      <p style={p}>Tus datos se almacenan en servidores seguros con cifrado en tránsito (HTTPS/TLS) y en reposo. Aplicamos controles de acceso estrictos y revisamos nuestras medidas de seguridad periódicamente.</p>
+      <h3 style={h}>4. Retención de datos</h3>
+      <p style={p}>Conservamos tus datos mientras tu cuenta esté activa. Al cancelar tu suscripción, puedes solicitar la eliminación de tus datos. Algunos datos pueden conservarse por obligaciones legales o fiscales.</p>
+      <h3 style={h}>5. Tus derechos</h3>
+      <p style={p}>Conforme a la Ley 81, tienes derecho a acceder, rectificar, cancelar u oponerte al tratamiento de tus datos personales. Para ejercer estos derechos, contáctanos por WhatsApp al +507 6514-3637.</p>
+      <h3 style={h}>6. Cookies</h3>
+      <p style={p}>Usamos cookies técnicas necesarias para el funcionamiento del servicio (sesión, autenticación). No usamos cookies de seguimiento publicitario de terceros.</p>
+      <h3 style={h}>7. Cambios a esta política</h3>
+      <p style={{ ...p, marginBottom: 0 }}>Podemos actualizar esta política ocasionalmente. Te notificaremos por correo o dentro de la plataforma ante cambios significativos. El uso continuo del servicio implica aceptación de la política vigente.</p>
+    </Modal>
+  );
+}
+
+/* ─── Product card ─── */
 function ProductCard({ product, index }) {
   const ref = useRef(null);
   const visible = useIntersection(ref);
@@ -113,7 +294,7 @@ function ProductCard({ product, index }) {
         </div>
       </div>
 
-      <p style={{ fontSize: isMobile ? 13 : 13, color: "rgba(255,255,255,0.42)", lineHeight: 1.65, marginBottom: 18 }}>{product.desc}</p>
+      <p style={{ fontSize: 13, color: "rgba(255,255,255,0.42)", lineHeight: 1.65, marginBottom: 18 }}>{product.desc}</p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 22 }}>
         {product.features.map(f => (
@@ -148,9 +329,13 @@ function ProductCard({ product, index }) {
   );
 }
 
+/* ─── Main ─── */
 export default function GestarSoftHome() {
   const [scrollY, setScrollY] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [demoOpen, setDemoOpen] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
   const w = useWindowWidth();
   const isMobile = w < 768;
   const isTablet = w < 1024;
@@ -165,12 +350,18 @@ export default function GestarSoftHome() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  // Close menu on scroll
   useEffect(() => {
     if (scrollY > 10) setMenuOpen(false);
   }, [scrollY]);
 
-  const px = isMobile ? "20px" : isTablet ? "36px" : "60px";
+  function openDemo() { setMenuOpen(false); setDemoOpen(true); }
+
+  const NAV_LINKS = [
+    { label: "Productos", action: () => { setMenuOpen(false); scrollTo("productos"); } },
+    { label: "Precios",   action: () => { setMenuOpen(false); scrollTo("productos"); } },
+    { label: "Nosotros",  action: () => { setMenuOpen(false); scrollTo("nosotros"); } },
+    { label: "Contacto",  action: () => { setMenuOpen(false); scrollTo("contacto"); } },
+  ];
 
   return (
     <div style={{
@@ -222,6 +413,11 @@ export default function GestarSoftHome() {
         }
       `}</style>
 
+      {/* Modals */}
+      <DemoModal    open={demoOpen}    onClose={() => setDemoOpen(false)} />
+      <TermsModal   open={termsOpen}   onClose={() => setTermsOpen(false)} />
+      <PrivacyModal open={privacyOpen} onClose={() => setPrivacyOpen(false)} />
+
       {/* ══════════ NAVBAR ══════════ */}
       <nav style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
@@ -237,28 +433,15 @@ export default function GestarSoftHome() {
           {/* Logo */}
           <div style={{ display: "flex", alignItems: "center" }}>
             <img
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Camponotus_flavomarginatus_ant.jpg/320px-Camponotus_flavomarginatus_ant.jpg"
-              alt="GestarSoft"
-              style={{ display: "none" }}
-            />
-            <img
               src="gestarsoft-logo.png"
               alt="GestarSoft"
               onError={(e) => {
                 e.target.style.display = "none";
                 e.target.nextSibling.style.display = "flex";
               }}
-              style={{
-                height: isMobile ? 90 : 180,
-                width: "auto",
-                objectFit: "contain",
-                filter: "brightness(1.15) contrast(1.05)",
-              }}
+              style={{ height: isMobile ? 90 : 180, width: "auto", objectFit: "contain", filter: "brightness(1.15) contrast(1.05)" }}
             />
-            <div style={{
-              display: "none",
-              alignItems: "center", gap: 10,
-            }}>
+            <div style={{ display: "none", alignItems: "center", gap: 10 }}>
               <div style={{
                 width: 34, height: 34, borderRadius: 9,
                 background: "linear-gradient(135deg, #00E5A0 0%, #7C6BFF 100%)",
@@ -271,33 +454,26 @@ export default function GestarSoftHome() {
             </div>
           </div>
 
-          {/* Desktop nav */}
+          {/* Desktop nav links */}
           {!isMobile && (
             <div style={{ display: "flex", gap: 28 }}>
-              {["Productos", "Precios", "Nosotros", "Contacto"].map(l => (
-                <span key={l} className="nav-link" style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.42)" }}>{l}</span>
+              {NAV_LINKS.map(l => (
+                <span key={l.label} className="nav-link" onClick={l.action} style={{ fontSize: 13, fontWeight: 600, color: "rgba(255,255,255,0.42)" }}>{l.label}</span>
               ))}
             </div>
           )}
 
-          {/* Desktop CTAs */}
+          {/* Desktop CTA */}
           {!isMobile && (
-            <div style={{ display: "flex", gap: 10 }}>
-              <button className="btn-ghost" style={{
-                background: "transparent", border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: 10, padding: "9px 18px", fontSize: 13, fontWeight: 700,
-                color: "rgba(255,255,255,0.55)",
-              }}>Iniciar sesión</button>
-              <button className="btn-primary" style={{
-                background: "linear-gradient(135deg, #00E5A0, #00B87A)",
-                borderRadius: 10, padding: "9px 20px",
-                fontSize: 13, fontWeight: 800, color: "#07090F",
-                boxShadow: "0 4px 16px rgba(0,229,160,0.28)",
-              }}>Demo gratis</button>
-            </div>
+            <button onClick={openDemo} className="btn-primary" style={{
+              background: "linear-gradient(135deg, #00E5A0, #00B87A)",
+              borderRadius: 10, padding: "9px 20px",
+              fontSize: 13, fontWeight: 800, color: "#07090F",
+              boxShadow: "0 4px 16px rgba(0,229,160,0.28)",
+            }}>Demo gratis</button>
           )}
 
-          {/* Mobile menu button */}
+          {/* Mobile hamburger */}
           {isMobile && (
             <button
               onClick={() => setMenuOpen(!menuOpen)}
@@ -320,34 +496,23 @@ export default function GestarSoftHome() {
           )}
         </div>
 
-        {/* Mobile menu dropdown */}
+        {/* Mobile menu */}
         {isMobile && menuOpen && (
-          <div className="mobile-menu" style={{
-            padding: "16px 20px 24px",
-            borderTop: "1px solid rgba(255,255,255,0.06)",
-          }}>
+          <div className="mobile-menu" style={{ padding: "16px 20px 24px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 20 }}>
-              {["Productos", "Precios", "Nosotros", "Contacto"].map(l => (
-                <div key={l} className="nav-link" onClick={() => setMenuOpen(false)} style={{
+              {NAV_LINKS.map(l => (
+                <div key={l.label} className="nav-link" onClick={l.action} style={{
                   fontSize: 16, fontWeight: 600, color: "rgba(255,255,255,0.6)",
-                  padding: "12px 0",
-                  borderBottom: "1px solid rgba(255,255,255,0.05)",
-                }}>{l}</div>
+                  padding: "12px 0", borderBottom: "1px solid rgba(255,255,255,0.05)",
+                }}>{l.label}</div>
               ))}
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <button className="btn-ghost" style={{
-                background: "transparent", border: "1px solid rgba(255,255,255,0.12)",
-                borderRadius: 12, padding: "13px", fontSize: 14, fontWeight: 700,
-                color: "rgba(255,255,255,0.6)", width: "100%",
-              }}>Iniciar sesión</button>
-              <button className="btn-primary" style={{
-                background: "linear-gradient(135deg, #00E5A0, #00B87A)",
-                borderRadius: 12, padding: "13px",
-                fontSize: 14, fontWeight: 800, color: "#07090F", width: "100%",
-                boxShadow: "0 4px 16px rgba(0,229,160,0.3)",
-              }}>Solicitar demo gratis</button>
-            </div>
+            <button onClick={openDemo} className="btn-primary" style={{
+              background: "linear-gradient(135deg, #00E5A0, #00B87A)",
+              borderRadius: 12, padding: "13px",
+              fontSize: 14, fontWeight: 800, color: "#07090F", width: "100%",
+              boxShadow: "0 4px 16px rgba(0,229,160,0.3)",
+            }}>Solicitar demo gratis</button>
           </div>
         )}
       </nav>
@@ -358,7 +523,6 @@ export default function GestarSoftHome() {
         position: "relative", overflow: "hidden",
         padding: isMobile ? "100px 20px 60px" : "120px 60px 80px",
       }}>
-        {/* Background */}
         <div style={{ position: "absolute", inset: 0, pointerEvents: "none" }}>
           <div style={{
             position: "absolute", inset: 0,
@@ -367,22 +531,19 @@ export default function GestarSoftHome() {
           }} />
           <div style={{
             position: "absolute", top: "15%", left: isMobile ? "-10%" : "4%",
-            width: isMobile ? 300 : 560, height: isMobile ? 300 : 560,
-            borderRadius: "50%",
+            width: isMobile ? 300 : 560, height: isMobile ? 300 : 560, borderRadius: "50%",
             background: "radial-gradient(circle, rgba(0,229,160,0.07) 0%, transparent 65%)",
             filter: "blur(50px)", animation: "float 9s ease infinite",
           }} />
           <div style={{
             position: "absolute", bottom: "10%", right: isMobile ? "-10%" : "4%",
-            width: isMobile ? 250 : 440, height: isMobile ? 250 : 440,
-            borderRadius: "50%",
+            width: isMobile ? 250 : 440, height: isMobile ? 250 : 440, borderRadius: "50%",
             background: "radial-gradient(circle, rgba(124,107,255,0.08) 0%, transparent 65%)",
             filter: "blur(50px)", animation: "float 12s ease infinite reverse",
           }} />
         </div>
 
         <div style={{ maxWidth: 820, width: "100%", textAlign: "center", position: "relative", zIndex: 1 }}>
-          {/* Badge */}
           <div className="anim-1" style={{
             display: "inline-flex", alignItems: "center", gap: 8,
             background: "rgba(0,229,160,0.07)", border: "1px solid rgba(0,229,160,0.18)",
@@ -394,7 +555,6 @@ export default function GestarSoftHome() {
             </span>
           </div>
 
-          {/* Headline */}
           <h1 className="anim-2" style={{
             fontSize: isMobile ? "clamp(32px, 8vw, 44px)" : "clamp(38px, 6vw, 72px)",
             fontWeight: 800, lineHeight: 1.08,
@@ -409,7 +569,6 @@ export default function GestarSoftHome() {
             }}>la realidad panameña</span>
           </h1>
 
-          {/* Subtitle */}
           <p className="anim-3" style={{
             fontSize: isMobile ? 14 : 17, color: "rgba(255,255,255,0.4)", lineHeight: 1.72,
             maxWidth: 520, margin: "0 auto", marginBottom: isMobile ? 32 : 44,
@@ -418,21 +577,20 @@ export default function GestarSoftHome() {
             contabilidad, derecho, gobierno corporativo y administración de propiedades.
           </p>
 
-          {/* CTAs */}
           <div className="anim-4 cta-buttons" style={{
             display: "flex", gap: 10, justifyContent: "center",
             flexWrap: "wrap", marginBottom: isMobile ? 44 : 60,
             flexDirection: isMobile ? "column" : "row",
             alignItems: "center",
           }}>
-            <button className="btn-primary" style={{
+            <button onClick={() => scrollTo("productos")} className="btn-primary" style={{
               background: "linear-gradient(135deg, #00E5A0, #00B87A)",
               borderRadius: 13, padding: isMobile ? "15px 0" : "15px 40px",
               fontSize: 15, fontWeight: 800, color: "#07090F",
               boxShadow: "0 8px 28px rgba(0,229,160,0.3)",
               width: isMobile ? "100%" : "auto",
             }}>Ver los productos →</button>
-            <button className="btn-ghost" style={{
+            <button onClick={openDemo} className="btn-ghost" style={{
               background: "transparent", border: "1px solid rgba(255,255,255,0.1)",
               borderRadius: 13, padding: isMobile ? "15px 0" : "15px 34px",
               fontSize: 15, fontWeight: 700, color: "rgba(255,255,255,0.55)",
@@ -440,35 +598,26 @@ export default function GestarSoftHome() {
             }}>Solicitar demo</button>
           </div>
 
-          {/* Stats */}
           <div className="anim-4 stats-row" style={{
             display: "flex", justifyContent: "center",
-            background: "rgba(255,255,255,0.02)",
-            border: "1px solid rgba(255,255,255,0.06)",
+            background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
             borderRadius: 14, overflow: "hidden",
             flexWrap: isMobile ? "wrap" : "nowrap",
-            maxWidth: isMobile ? "100%" : "fit-content",
-            margin: "0 auto",
+            maxWidth: isMobile ? "100%" : "fit-content", margin: "0 auto",
           }}>
             {[
-              { value: "4", label: "Productos activos" },
-              { value: "100%", label: "Normativa Panamá" },
-              { value: "24/7", label: "Asistente IA" },
+              { value: "4",     label: "Productos activos" },
+              { value: "100%",  label: "Normativa Panamá" },
+              { value: "24/7",  label: "Asistente IA" },
               { value: "B/.$0", label: "Sin contratos" },
             ].map((s, i) => (
               <div key={s.label} style={{
                 padding: isMobile ? "14px 20px" : "18px 32px",
-                borderRight: isMobile
-                  ? i % 2 === 0 ? "1px solid rgba(255,255,255,0.06)" : "none"
-                  : i < 3 ? "1px solid rgba(255,255,255,0.06)" : "none",
+                borderRight: isMobile ? (i % 2 === 0 ? "1px solid rgba(255,255,255,0.06)" : "none") : (i < 3 ? "1px solid rgba(255,255,255,0.06)" : "none"),
                 borderBottom: isMobile && i < 2 ? "1px solid rgba(255,255,255,0.06)" : "none",
-                flex: isMobile ? "0 0 50%" : "auto",
-                textAlign: "center",
+                flex: isMobile ? "0 0 50%" : "auto", textAlign: "center",
               }}>
-                <div style={{
-                  fontSize: isMobile ? 22 : 26, fontWeight: 800, color: "#00E5A0",
-                  fontFamily: "'DM Mono', monospace", letterSpacing: "-0.02em", marginBottom: 3,
-                }}>{s.value}</div>
+                <div style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, color: "#00E5A0", fontFamily: "'DM Mono', monospace", letterSpacing: "-0.02em", marginBottom: 3 }}>{s.value}</div>
                 <div style={{ fontSize: 10, color: "rgba(255,255,255,0.28)", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>{s.label}</div>
               </div>
             ))}
@@ -478,10 +627,8 @@ export default function GestarSoftHome() {
 
       {/* ══════════ MARQUEE ══════════ */}
       <div style={{
-        borderTop: "1px solid rgba(255,255,255,0.05)",
-        borderBottom: "1px solid rgba(255,255,255,0.05)",
-        padding: "12px 0", overflow: "hidden",
-        background: "rgba(0,229,160,0.012)",
+        borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)",
+        padding: "12px 0", overflow: "hidden", background: "rgba(0,229,160,0.012)",
       }}>
         <div style={{ display: "flex", gap: 48, whiteSpace: "nowrap", animation: "marquee 18s linear infinite" }}>
           {[...PRODUCTS, ...PRODUCTS, ...PRODUCTS, ...PRODUCTS].map((p, i) => (
@@ -498,7 +645,7 @@ export default function GestarSoftHome() {
       </div>
 
       {/* ══════════ PRODUCTS ══════════ */}
-      <section style={{ padding: isMobile ? "64px 20px" : "96px 60px" }}>
+      <section id="productos" style={{ padding: isMobile ? "64px 20px" : "96px 60px" }}>
         <div style={{ maxWidth: 1140, margin: "0 auto" }}>
           <div style={{ marginBottom: isMobile ? 36 : 52 }}>
             <div style={{
@@ -517,7 +664,6 @@ export default function GestarSoftHome() {
               Cada producto construido sobre la legislación y normativa vigente de Panamá.
             </p>
           </div>
-
           <div className="products-grid" style={{
             display: "grid",
             gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr 1fr" : "1fr 1fr",
@@ -532,6 +678,7 @@ export default function GestarSoftHome() {
 
       {/* ══════════ WHY ══════════ */}
       <section
+        id="nosotros"
         ref={whyRef}
         style={{
           padding: isMobile ? "64px 20px" : "96px 60px",
@@ -544,10 +691,8 @@ export default function GestarSoftHome() {
           maxWidth: 1100, margin: "0 auto",
           display: "grid",
           gridTemplateColumns: isMobile || isTablet ? "1fr" : "1fr 1fr",
-          gap: isMobile ? 48 : 72,
-          alignItems: "center",
+          gap: isMobile ? 48 : 72, alignItems: "center",
         }}>
-          {/* Left */}
           <div style={{
             transform: whyVisible ? "translateY(0)" : "translateY(24px)",
             opacity: whyVisible ? 1 : 0,
@@ -595,13 +740,13 @@ export default function GestarSoftHome() {
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontSize: 13, color: item.color,
                   }}>{item.icon}</div>
-                  <span style={{ fontSize: isMobile ? 13 : 13, color: "rgba(255,255,255,0.52)", lineHeight: 1.55, paddingTop: 7 }}>{item.text}</span>
+                  <span style={{ fontSize: 13, color: "rgba(255,255,255,0.52)", lineHeight: 1.55, paddingTop: 7 }}>{item.text}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Right — Dashboard mock */}
+          {/* Dashboard mock */}
           <div style={{
             position: "relative",
             transform: whyVisible ? "translateY(0)" : "translateY(24px)",
@@ -609,13 +754,10 @@ export default function GestarSoftHome() {
             transition: "all 0.7s cubic-bezier(0.4,0,0.2,1) 0.15s",
           }}>
             <div style={{
-              background: "rgba(255,255,255,0.025)",
-              border: "1px solid rgba(255,255,255,0.07)",
-              borderRadius: 20, padding: isMobile ? 18 : 24,
-              position: "relative", overflow: "hidden",
+              background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: 20, padding: isMobile ? 18 : 24, position: "relative", overflow: "hidden",
             }}>
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg, transparent, #00E5A0 50%, transparent)" }} />
-
               <div style={{ display: "flex", gap: 5, alignItems: "center", marginBottom: 16 }}>
                 {["#FF6B6B", "#FFB930", "#00E5A0"].map(c => (
                   <div key={c} style={{ width: 8, height: 8, borderRadius: "50%", background: c, opacity: 0.7 }} />
@@ -624,18 +766,14 @@ export default function GestarSoftHome() {
                   <span style={{ fontSize: 8, color: "rgba(255,255,255,0.2)", fontFamily: "'DM Mono', monospace" }}>app.gestarsoft.com</span>
                 </div>
               </div>
-
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
                 {[
                   { l: "Ingresos", v: "B/. 48,720", c: "#00E5A0", w: "72%" },
-                  { l: "Gastos", v: "B/. 21,340", c: "#FF6B6B", w: "44%" },
-                  { l: "CxC", v: "B/. 15,880", c: "#7C6BFF", w: "58%" },
-                  { l: "ITBMS", v: "B/. 3,410", c: "#FFB930", w: "28%" },
+                  { l: "Gastos",   v: "B/. 21,340", c: "#FF6B6B", w: "44%" },
+                  { l: "CxC",      v: "B/. 15,880", c: "#7C6BFF", w: "58%" },
+                  { l: "ITBMS",    v: "B/. 3,410",  c: "#FFB930", w: "28%" },
                 ].map(k => (
-                  <div key={k.l} style={{
-                    background: `${k.c}07`, border: `1px solid ${k.c}14`,
-                    borderRadius: 10, padding: "11px 12px",
-                  }}>
+                  <div key={k.l} style={{ background: `${k.c}07`, border: `1px solid ${k.c}14`, borderRadius: 10, padding: "11px 12px" }}>
                     <div style={{ fontSize: 8, color: "rgba(255,255,255,0.22)", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 5 }}>{k.l}</div>
                     <div style={{ fontSize: isMobile ? 12 : 14, fontWeight: 800, color: "#EEF2FF", fontFamily: "'DM Mono', monospace", marginBottom: 7 }}>{k.v}</div>
                     <div style={{ height: 2, background: `${k.c}18`, borderRadius: 1 }}>
@@ -644,18 +782,9 @@ export default function GestarSoftHome() {
                   </div>
                 ))}
               </div>
-
-              <div style={{
-                background: "rgba(0,229,160,0.04)", border: "1px solid rgba(0,229,160,0.12)",
-                borderRadius: 10, padding: "12px 14px",
-              }}>
+              <div style={{ background: "rgba(0,229,160,0.04)", border: "1px solid rgba(0,229,160,0.12)", borderRadius: 10, padding: "12px 14px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 7 }}>
-                  <div style={{
-                    width: 20, height: 20, borderRadius: 6,
-                    background: "linear-gradient(135deg, #00E5A0, #7C6BFF)",
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    fontSize: 9, color: "#07090F", fontWeight: 800,
-                  }}>✦</div>
+                  <div style={{ width: 20, height: 20, borderRadius: 6, background: "linear-gradient(135deg, #00E5A0, #7C6BFF)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, color: "#07090F", fontWeight: 800 }}>✦</div>
                   <span style={{ fontSize: 9, fontWeight: 700, color: "#00E5A0", textTransform: "uppercase", letterSpacing: "0.07em" }}>Asistente IA</span>
                 </div>
                 <p style={{ fontSize: 11, color: "rgba(255,255,255,0.38)", lineHeight: 1.6 }}>
@@ -663,23 +792,10 @@ export default function GestarSoftHome() {
                 </p>
               </div>
             </div>
-
             {!isMobile && (
               <>
-                <div style={{
-                  position: "absolute", top: -12, right: -12,
-                  background: "linear-gradient(135deg, #00E5A0, #00B87A)",
-                  borderRadius: 10, padding: "6px 12px",
-                  fontSize: 11, fontWeight: 800, color: "#07090F",
-                  boxShadow: "0 6px 18px rgba(0,229,160,0.36)",
-                }}>✓ DGI Integrado</div>
-                <div style={{
-                  position: "absolute", bottom: -12, left: -12,
-                  background: "linear-gradient(135deg, #7C6BFF, #5B4BE0)",
-                  borderRadius: 10, padding: "6px 12px",
-                  fontSize: 11, fontWeight: 800, color: "#fff",
-                  boxShadow: "0 6px 18px rgba(124,107,255,0.34)",
-                }}>⚡ IA Incluida</div>
+                <div style={{ position: "absolute", top: -12, right: -12, background: "linear-gradient(135deg, #00E5A0, #00B87A)", borderRadius: 10, padding: "6px 12px", fontSize: 11, fontWeight: 800, color: "#07090F", boxShadow: "0 6px 18px rgba(0,229,160,0.36)" }}>✓ DGI Integrado</div>
+                <div style={{ position: "absolute", bottom: -12, left: -12, background: "linear-gradient(135deg, #7C6BFF, #5B4BE0)", borderRadius: 10, padding: "6px 12px", fontSize: 11, fontWeight: 800, color: "#fff", boxShadow: "0 6px 18px rgba(124,107,255,0.34)" }}>⚡ IA Incluida</div>
               </>
             )}
           </div>
@@ -696,7 +812,6 @@ export default function GestarSoftHome() {
             }}>Lo que dicen nuestros clientes</h2>
             <p style={{ fontSize: isMobile ? 13 : 14, color: "rgba(255,255,255,0.32)" }}>Empresas panameñas que ya usan GestarSoft</p>
           </div>
-
           <div className="testimonials-grid" style={{
             display: "grid",
             gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr 1fr" : "repeat(3, 1fr)",
@@ -704,8 +819,7 @@ export default function GestarSoftHome() {
           }}>
             {TESTIMONIALS.map((t, i) => (
               <div key={t.name} style={{
-                background: "rgba(255,255,255,0.025)",
-                border: "1px solid rgba(255,255,255,0.07)",
+                background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.07)",
                 borderRadius: 18, padding: isMobile ? "22px 20px" : "26px 24px",
                 transform: testimonialsVisible ? "translateY(0)" : "translateY(20px)",
                 opacity: testimonialsVisible ? 1 : 0,
@@ -715,9 +829,7 @@ export default function GestarSoftHome() {
               }}>
                 <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg, transparent, ${t.color}50, transparent)` }} />
                 <div style={{ fontSize: 16, color: t.color, marginBottom: 12, letterSpacing: 2 }}>★★★★★</div>
-                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.48)", lineHeight: 1.7, marginBottom: 20, fontStyle: "italic" }}>
-                  "{t.text}"
-                </p>
+                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.48)", lineHeight: 1.7, marginBottom: 20, fontStyle: "italic" }}>"{t.text}"</p>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{
                     width: 36, height: 36, borderRadius: 10, flexShrink: 0,
@@ -737,14 +849,13 @@ export default function GestarSoftHome() {
       </section>
 
       {/* ══════════ CTA FINAL ══════════ */}
-      <section style={{
+      <section id="contacto" style={{
         padding: isMobile ? "64px 20px" : "96px 60px",
         borderTop: "1px solid rgba(255,255,255,0.04)",
         position: "relative", overflow: "hidden",
       }}>
         <div style={{
-          position: "absolute", top: "50%", left: "50%",
-          transform: "translate(-50%,-50%)",
+          position: "absolute", top: "50%", left: "50%", transform: "translate(-50%,-50%)",
           width: isMobile ? 300 : 600, height: 200, borderRadius: "50%",
           background: "radial-gradient(ellipse, rgba(0,229,160,0.05) 0%, transparent 70%)",
           filter: "blur(60px)", pointerEvents: "none",
@@ -756,26 +867,22 @@ export default function GestarSoftHome() {
             marginBottom: 14, color: "#EEF2FF", lineHeight: 1.1,
           }}>
             Empieza hoy.<br />
-            <span style={{
-              background: "linear-gradient(90deg, #00E5A0, #7C6BFF)",
-              WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-            }}>Sin contratos.</span>
+            <span style={{ background: "linear-gradient(90deg, #00E5A0, #7C6BFF)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              Sin contratos.
+            </span>
           </h2>
           <p style={{ fontSize: isMobile ? 14 : 15, color: "rgba(255,255,255,0.36)", marginBottom: 34, lineHeight: 1.7 }}>
             Solicita una demo y descubre cómo GestarSoft simplifica tu operación desde el primer día.
           </p>
-          <div className="cta-buttons" style={{
-            display: "flex", gap: 10, justifyContent: "center",
-            flexDirection: isMobile ? "column" : "row",
-          }}>
-            <button className="btn-primary" style={{
+          <div className="cta-buttons" style={{ display: "flex", gap: 10, justifyContent: "center", flexDirection: isMobile ? "column" : "row" }}>
+            <button onClick={openDemo} className="btn-primary" style={{
               background: "linear-gradient(135deg, #00E5A0, #00B87A)",
               borderRadius: 13, padding: "15px 40px",
               fontSize: 15, fontWeight: 800, color: "#07090F",
               boxShadow: "0 8px 28px rgba(0,229,160,0.3)",
               width: isMobile ? "100%" : "auto",
             }}>Solicitar demo →</button>
-            <button className="btn-ghost" style={{
+            <button onClick={() => scrollTo("productos")} className="btn-ghost" style={{
               background: "transparent", border: "1px solid rgba(255,255,255,0.1)",
               borderRadius: 13, padding: "15px 32px",
               fontSize: 15, fontWeight: 700, color: "rgba(255,255,255,0.52)",
@@ -789,43 +896,33 @@ export default function GestarSoftHome() {
       </section>
 
       {/* ══════════ FOOTER ══════════ */}
-      <footer style={{
-        padding: isMobile ? "28px 20px" : "32px 60px",
-        borderTop: "1px solid rgba(255,255,255,0.04)",
-      }}>
-        <div className="footer-row" style={{
-          display: "flex", justifyContent: "space-between",
-          alignItems: "center", flexWrap: "wrap", gap: 16,
-        }}>
+      <footer style={{ padding: isMobile ? "28px 20px" : "32px 60px", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+        <div className="footer-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <img
-              src="gestarsoft-logo.png"
-              alt="GestarSoft"
-              style={{
-                height: 70, width: "auto",
-                objectFit: "contain",
-                opacity: 0.6,
-                filter: "brightness(1.2)",
-              }}
-            />
+            <img src="gestarsoft-logo.png" alt="GestarSoft" style={{ height: 70, width: "auto", objectFit: "contain", opacity: 0.6, filter: "brightness(1.2)" }} />
             <span style={{ fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.25)" }}>
               Ciudad de Panamá, República de Panamá
             </span>
           </div>
+
           {!isMobile && (
             <div style={{ display: "flex", gap: 20 }}>
-              {["Términos", "Privacidad", "Soporte", "LinkedIn"].map(l => (
-                <span key={l} className="nav-link" style={{ fontSize: 12, color: "rgba(255,255,255,0.18)", fontWeight: 600 }}>{l}</span>
-              ))}
+              <span onClick={() => setTermsOpen(true)}   className="nav-link" style={{ fontSize: 12, color: "rgba(255,255,255,0.18)", fontWeight: 600 }}>Términos</span>
+              <span onClick={() => setPrivacyOpen(true)} className="nav-link" style={{ fontSize: 12, color: "rgba(255,255,255,0.18)", fontWeight: 600 }}>Privacidad</span>
+              <a href={`https://wa.me/${WA_NUMBER}`} target="_blank" rel="noopener noreferrer" className="nav-link" style={{ fontSize: 12, color: "rgba(255,255,255,0.18)", fontWeight: 600, textDecoration: "none" }}>Soporte</a>
+              <a href="https://www.linkedin.com/company/gestarsoft" target="_blank" rel="noopener noreferrer" className="nav-link" style={{ fontSize: 12, color: "rgba(255,255,255,0.18)", fontWeight: 600, textDecoration: "none" }}>LinkedIn</a>
             </div>
           )}
-          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.1)" }}>© 2025 GestarSoft</span>
+
+          <span style={{ fontSize: 11, color: "rgba(255,255,255,0.1)" }}>© 2026 GestarSoft</span>
         </div>
+
         {isMobile && (
           <div style={{ display: "flex", gap: 20, marginTop: 16, flexWrap: "wrap" }}>
-            {["Términos", "Privacidad", "Soporte", "LinkedIn"].map(l => (
-              <span key={l} className="nav-link" style={{ fontSize: 12, color: "rgba(255,255,255,0.18)", fontWeight: 600 }}>{l}</span>
-            ))}
+            <span onClick={() => setTermsOpen(true)}   className="nav-link" style={{ fontSize: 12, color: "rgba(255,255,255,0.18)", fontWeight: 600 }}>Términos</span>
+            <span onClick={() => setPrivacyOpen(true)} className="nav-link" style={{ fontSize: 12, color: "rgba(255,255,255,0.18)", fontWeight: 600 }}>Privacidad</span>
+            <a href={`https://wa.me/${WA_NUMBER}`} target="_blank" rel="noopener noreferrer" className="nav-link" style={{ fontSize: 12, color: "rgba(255,255,255,0.18)", fontWeight: 600, textDecoration: "none" }}>Soporte</a>
+            <a href="https://www.linkedin.com/company/gestarsoft" target="_blank" rel="noopener noreferrer" className="nav-link" style={{ fontSize: 12, color: "rgba(255,255,255,0.18)", fontWeight: 600, textDecoration: "none" }}>LinkedIn</a>
           </div>
         )}
       </footer>
